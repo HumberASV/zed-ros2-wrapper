@@ -178,7 +178,7 @@
             minimum_keypoints_threshold: 5 # [DYNAMIC] - Minimum number of skeleton key points to be detected for a valid skeleton
 
         stream_server:
-            stream_enabled: false # enable the streaming server when the camera is open
+            stream_enabled: true # enable the streaming server when the camera is open
             codec: 'H265' # different encoding types for image streaming: 'H264', 'H265'
             port: 30000 # Port used for streaming. Port must be an even number. Any odd number will be rejected.
             bitrate: 12500 # [1000 - 60000] Streaming bitrate (in Kbits/s) used for streaming. See https://www.stereolabs.com/docs/api/structsl_1_1StreamingParameters.html#a873ba9440e3e9786eb1476a3bfa536d0
@@ -214,7 +214,7 @@
             debug_object_detection: false # Enable/Disable the printing of debug messages related to object detection functionalities
             debug_body_tracking: false # Enable/Disable the printing of debug messages related to body tracking functionalities
             debug_roi: false # Enable/Disable the printing of debug messages related to region of interest functionalities
-            debug_streaming: false # Enable/Disable the printing of debug messages related to the network streaming functionalities
+            debug_streaming: true # Enable/Disable the printing of debug messages related to the network streaming functionalities
             debug_advanced: false # Enable/Disable the printing of debug messages related to advanced functionalities
-            debug_nitros: false # Enable/Disable the printing of debug messages related to NITROS functionalities
+            debug_nitros: true # Enable/Disable the printing of debug messages related to NITROS functionalities
             disable_nitros: false # If available, disable NITROS usage for debugging and testing purposes
