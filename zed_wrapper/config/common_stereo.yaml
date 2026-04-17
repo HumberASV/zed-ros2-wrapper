@@ -205,7 +205,7 @@
             debug_video_depth: false # Enable/Disable the printing of debug messages related to video and depth parameters and functionalities
             debug_camera_controls: false # Enable/Disable the printing of debug messages related to camera controls (exposure, gain, white balance, etc)
             debug_point_cloud: false # Enable/Disable the printing of debug messages related to point cloud generation and publishing
-            debug_tf: false # Enable/Disable the printing of debug messages related to TF broadcasting
+            debug_tf: true # Enable/Disable the printing of debug messages related to TF broadcasting
             debug_positional_tracking: false # Enable/Disable the printing of debug messages related to positional tracking
             debug_gnss: false # Enable/Disable the printing of debug messages related to GNSS functionalities
             debug_sensors: false # Enable/Disable the printing of debug messages related to sensor data
