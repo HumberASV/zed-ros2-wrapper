@@ -9608,7 +9608,7 @@ void ZedCamera::callback_setRoi(
       if (_nitrosDisabled) {
         if (mPubRoiMask.getTopic().empty()) {
           mPubRoiMask = image_transport::create_publisher(
-            this, mRoiMaskTopic, mQos.get_rmw_qos_profile());
+            this, mRoiMaskTopic, mQos.get_rmw_qos_profile(), mPubOpt);
           RCLCPP_INFO_STREAM(
             get_logger(), " * Advertised on topic: "
               << mPubRoiMask.getTopic());
