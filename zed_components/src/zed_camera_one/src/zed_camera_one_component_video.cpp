@@ -274,7 +274,11 @@ void ZedCameraOne::initVideoPublishers()
     ImageTopicType type = ImageTopicType::IMAGE) {
       ipcPub = create_ipc_pub(topic);
       set_transport_plugins(topic, type);
+#ifdef FOUND_HUMBLE
+      itPub = image_transport::create_publisher(this, topic, qos);
+#else
       itPub = image_transport::create_publisher(this, topic, qos, _pubOpt);
+#endif
       log_cam_pub(itPub);
     };
 
@@ -295,8 +299,6 @@ void ZedCameraOne::initVideoPublishers()
         create_dual_pub(_imgRawGrayTopic, _pubIpcGrayRawImg, _pubGrayRawImg);
       }
     }
-
-
   } else {
 #ifdef FOUND_ISAAC_ROS_NITROS
     // Nitros publishers lambda

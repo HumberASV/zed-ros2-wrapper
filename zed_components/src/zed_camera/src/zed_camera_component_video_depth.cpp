@@ -217,7 +217,11 @@ void ZedCamera::initVideoDepthPublishers()
       ImageTopicType type = ImageTopicType::IMAGE) {
         ipcPub = create_ipc_pub(topic);
         set_transport_plugins(topic, type);
+#ifdef FOUND_HUMBLE
+        itPub = image_transport::create_publisher(this, topic, qos);
+#else
         itPub = image_transport::create_publisher(this, topic, qos, mPubOpt);
+#endif
         log_cam_pub(itPub);
       };
 
