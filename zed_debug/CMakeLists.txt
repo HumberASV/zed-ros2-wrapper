@@ -71,14 +71,21 @@ endif()
 
 #############################################
 # Dependencies
+cmake_policy(SET CMP0146 OLD)
+cmake_policy(SET CMP0153 OLD)
 find_package(ZED REQUIRED)
+cmake_policy(SET CMP0146 NEW)
+cmake_policy(SET CMP0153 NEW)
 
-exec_program(uname ARGS -p OUTPUT_VARIABLE CMAKE_SYSTEM_NAME2)
+execute_process(COMMAND uname -p OUTPUT_VARIABLE CMAKE_SYSTEM_NAME2 OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(CMAKE_SYSTEM_NAME2 MATCHES "aarch64") # Jetson TX
     set(CUDA_USE_STATIC_CUDA_RUNTIME OFF)
 endif()
 
-find_package(CUDA REQUIRED)
+find_package(CUDAToolkit REQUIRED)
+set(CUDA_INCLUDE_DIRS ${CUDAToolkit_INCLUDE_DIRS})
+set(CUDA_LIBRARIES CUDA::cudart)
+set(CUDA_LIBRARY_DIRS ${CUDAToolkit_LIBRARY_DIR})
 
 set(DEPENDENCIES
     rclcpp

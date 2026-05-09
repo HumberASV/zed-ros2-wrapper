@@ -140,7 +140,7 @@ void ZedCameraOne::initVideoPublishers()
   // Helper to build topic names
   auto make_topic =
     [&](const std::string & sensor, const std::string & color_mode, const std::string & rect_raw,
-      const std::string & type) {
+    const std::string & type) {
       std::string topic = _topicRoot + sensor + color_mode + rect_raw + type;
       return get_node_topics_interface()->resolve_topic_name(topic);
     };
@@ -896,7 +896,7 @@ void ZedCameraOne::applyDynamicSettings()
 void ZedCameraOne::applySaturationSharpnessGamma()
 {
   auto setVideoSetting = [this](sl::VIDEO_SETTINGS setting, int value,
-      const std::string & settingName) {
+    const std::string & settingName) {
       if (this->_camDynParMapChanged[settingName]) {
         sl::ERROR_CODE ret_code = _zed->setCameraSettings(setting, value);
         if (ret_code != sl::ERROR_CODE::SUCCESS) {
@@ -920,7 +920,7 @@ void ZedCameraOne::applySaturationSharpnessGamma()
 void ZedCameraOne::applyWhiteBalance()
 {
   auto setVideoSetting = [this](sl::VIDEO_SETTINGS setting, int value,
-      const std::string & settingName) {
+    const std::string & settingName) {
       if (this->_camDynParMapChanged[settingName]) {
         sl::ERROR_CODE ret_code = _zed->setCameraSettings(setting, value);
         if (ret_code != sl::ERROR_CODE::SUCCESS) {
@@ -950,7 +950,7 @@ void ZedCameraOne::applyWhiteBalance()
 void ZedCameraOne::applyExposure()
 {
   auto setVideoSetting = [this](sl::VIDEO_SETTINGS setting, int value,
-      const std::string & settingName) {
+    const std::string & settingName) {
       if (this->_camDynParMapChanged[settingName]) {
         sl::ERROR_CODE ret_code = _zed->setCameraSettings(setting, value);
         if (ret_code != sl::ERROR_CODE::SUCCESS) {
@@ -966,7 +966,7 @@ void ZedCameraOne::applyExposure()
     };
 
   auto setVideoSettingRange = [this](sl::VIDEO_SETTINGS setting, int value_min,
-      int value_max, const std::string & settingName_min, const std::string & settingName_max) {
+    int value_max, const std::string & settingName_min, const std::string & settingName_max) {
       if (this->_camDynParMapChanged[settingName_min] ||
         this->_camDynParMapChanged[settingName_max])
       {
@@ -1045,7 +1045,7 @@ void ZedCameraOne::applyExposure()
 void ZedCameraOne::applyAnalogGain()
 {
   auto setVideoSetting = [this](sl::VIDEO_SETTINGS setting, int value,
-      const std::string & settingName) {
+    const std::string & settingName) {
       if (this->_camDynParMapChanged[settingName]) {
         sl::ERROR_CODE ret_code = _zed->setCameraSettings(setting, value);
         if (ret_code != sl::ERROR_CODE::SUCCESS) {
@@ -1061,7 +1061,7 @@ void ZedCameraOne::applyAnalogGain()
     };
 
   auto setVideoSettingRange = [this](sl::VIDEO_SETTINGS setting, int value_min,
-      int value_max, const std::string & settingName_min, const std::string & settingName_max) {
+    int value_max, const std::string & settingName_min, const std::string & settingName_max) {
       if (this->_camDynParMapChanged[settingName_min] ||
         this->_camDynParMapChanged[settingName_max])
       {
@@ -1139,7 +1139,7 @@ void ZedCameraOne::applyAnalogGain()
 void ZedCameraOne::applyDigitalGain()
 {
   auto setVideoSetting = [this](sl::VIDEO_SETTINGS setting, int value,
-      const std::string & settingName) {
+    const std::string & settingName) {
       if (this->_camDynParMapChanged[settingName]) {
         sl::ERROR_CODE ret_code = _zed->setCameraSettings(setting, value);
         if (ret_code != sl::ERROR_CODE::SUCCESS) {
@@ -1155,7 +1155,7 @@ void ZedCameraOne::applyDigitalGain()
     };
 
   auto setVideoSettingRange = [this](sl::VIDEO_SETTINGS setting, int value_min,
-      int value_max, const std::string & settingName_min, const std::string & settingName_max) {
+    int value_max, const std::string & settingName_min, const std::string & settingName_max) {
       if (this->_camDynParMapChanged[settingName_min] ||
         this->_camDynParMapChanged[settingName_max])
       {
@@ -1233,7 +1233,7 @@ void ZedCameraOne::applyDigitalGain()
 void ZedCameraOne::applyExposureCompensationAndDenoising()
 {
   auto setVideoSetting = [this](sl::VIDEO_SETTINGS setting, int value,
-      const std::string & settingName) {
+    const std::string & settingName) {
       if (this->_camDynParMapChanged[settingName]) {
         sl::ERROR_CODE ret_code = _zed->setCameraSettings(setting, value);
         if (ret_code != sl::ERROR_CODE::SUCCESS) {
