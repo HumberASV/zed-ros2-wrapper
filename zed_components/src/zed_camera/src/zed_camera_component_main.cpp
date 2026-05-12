@@ -3905,17 +3905,30 @@ bool ZedCamera::startPosTracking()
     return false;
   }
 
-  if (mZed && mZed->isPositionalTrackingEnabled()) {
-    if (!mAreaMemoryFilePath.empty() && mSaveAreaMemoryOnClosing) {
-      mZed->disablePositionalTracking(mAreaMemoryFilePath.c_str());
-      RCLCPP_INFO(
-        get_logger(),
-        "Area memory updated before restarting the Positional "
-        "Tracking module.");
-    } else {
-      mZed->disablePositionalTracking();
+  
+    if (mZed && mZed->isPositionalTrackingEnabled()) {
+      if (!mAreaMemoryFilePath.empty() && mSaveAreaMemoryOnClosing) {
+        // ----> Safe disablePositionalTracking
+        {
+          std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+          mZed->disablePositionalTracking(mAreaMemoryFilePath.c_str());
+        }
+        // <---- Safe disablePositionalTracking
+        RCLCPP_INFO(
+          get_logger(),
+          "Area memory updated before restarting the Positional "
+          "Tracking module.");
+      } else {
+        // ----> Safe disablePositionalTracking
+        {
+          std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+          mZed->disablePositionalTracking();
+        }
+        // <---- Safe disablePositionalTracking
+      }
     }
   }
+  // <---- Safe disablePositionalTracking
 
   RCLCPP_INFO(get_logger(), "=== Starting Positional Tracking ===");
 
@@ -4002,15 +4015,20 @@ bool ZedCamera::startPosTracking()
     DEBUG_PT(json.c_str());
   }
 
-  sl::ERROR_CODE err = mZed->enablePositionalTracking(ptParams);
+  // ----> Safe enablePositionalTracking
+  {
+    std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+    sl::ERROR_CODE err = mZed->enablePositionalTracking(ptParams);
 
-  if (err != sl::ERROR_CODE::SUCCESS) {
-    mPosTrackingStarted = false;
-    RCLCPP_WARN(
-      get_logger(), "Pos. Tracking not started: %s",
-      sl::toString(err).c_str());
-    return false;
+    if (err != sl::ERROR_CODE::SUCCESS) {
+      mPosTrackingStarted = false;
+      RCLCPP_WARN(
+        get_logger(), "Pos. Tracking not started: %s",
+        sl::toString(err).c_str());
+      return false;
+    }
   }
+  // <---- Safe enablePositionalTracking
 
   DEBUG_PT("Positional Tracking started");
 
@@ -4038,18 +4056,23 @@ bool ZedCamera::startPosTracking()
 
     fusion_params.gnss_calibration_parameters = gnss_par;
 
-    sl::FUSION_ERROR_CODE fus_err =
-      mFusion.enablePositionalTracking(fusion_params);
+    // ----> Safe enablePositionalTracking/disablePositionalTracking
+    {
+      std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+      sl::FUSION_ERROR_CODE fus_err =
+        mFusion.enablePositionalTracking(fusion_params);
 
-    if (fus_err != sl::FUSION_ERROR_CODE::SUCCESS) {
-      mPosTrackingStarted = false;
-      RCLCPP_WARN(
-        get_logger(), "Fusion Pos. Tracking not started: %s",
-        sl::toString(fus_err).c_str());
-      mZed->disablePositionalTracking();
-      return false;
+      if (fus_err != sl::FUSION_ERROR_CODE::SUCCESS) {
+        mPosTrackingStarted = false;
+        RCLCPP_WARN(
+          get_logger(), "Fusion Pos. Tracking not started: %s",
+          sl::toString(fus_err).c_str());
+        mZed->disablePositionalTracking();
+        return false;
+      }
+      DEBUG_GNSS("Fusion Positional Tracking started");
     }
-    DEBUG_GNSS("Fusion Positional Tracking started");
+    // <---- Safe enablePositionalTracking/disablePositionalTracking
   }
   // <---- Enable Fusion Positional Tracking if required
 
