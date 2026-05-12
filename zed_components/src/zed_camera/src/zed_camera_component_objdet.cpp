@@ -978,7 +978,7 @@ bool ZedCamera::startObjDetect()
 
   // ----> Safe enableObjectDetection
   {
-    std::lock_guard<std::mutex> grab_lock(mGrabMutex);    
+    std::lock_guard<std::mutex> grab_lock(mGrabMutex);
     sl::ERROR_CODE objDetError = mZed->enableObjectDetection(od_p);
     if (objDetError != sl::ERROR_CODE::SUCCESS) {
       RCLCPP_ERROR_STREAM(

@@ -3914,30 +3914,29 @@ bool ZedCamera::startPosTrackingLocked()
     return false;
   }
 
-  
-    if (mZed && mZed->isPositionalTrackingEnabled()) {
-      if (!mAreaMemoryFilePath.empty() && mSaveAreaMemoryOnClosing) {
-        // ----> Safe disablePositionalTracking
-        {
-          std::lock_guard<std::mutex> grab_lock(mGrabMutex);
-          mZed->disablePositionalTracking(mAreaMemoryFilePath.c_str());
-        }
-        // <---- Safe disablePositionalTracking
-        RCLCPP_INFO(
-          get_logger(),
-          "Area memory updated before restarting the Positional "
-          "Tracking module.");
-      } else {
-        // ----> Safe disablePositionalTracking
-        {
-          std::lock_guard<std::mutex> grab_lock(mGrabMutex);
-          mZed->disablePositionalTracking();
-        }
-        // <---- Safe disablePositionalTracking
+
+  if (mZed && mZed->isPositionalTrackingEnabled()) {
+    if (!mAreaMemoryFilePath.empty() && mSaveAreaMemoryOnClosing) {
+      // ----> Safe disablePositionalTracking
+      {
+        std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+        mZed->disablePositionalTracking(mAreaMemoryFilePath.c_str());
       }
+      // <---- Safe disablePositionalTracking
+      RCLCPP_INFO(
+        get_logger(),
+        "Area memory updated before restarting the Positional "
+        "Tracking module.");
+    } else {
+      // ----> Safe disablePositionalTracking
+      {
+        std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+        mZed->disablePositionalTracking();
+      }
+      // <---- Safe disablePositionalTracking
     }
   }
-  // <---- Safe disablePositionalTracking
+
 
   RCLCPP_INFO(get_logger(), "=== Starting Positional Tracking ===");
 
@@ -4025,9 +4024,10 @@ bool ZedCamera::startPosTrackingLocked()
   }
 
   // ----> Safe enablePositionalTracking
+  sl::ERROR_CODE err;
   {
     std::lock_guard<std::mutex> grab_lock(mGrabMutex);
-    sl::ERROR_CODE err = mZed->enablePositionalTracking(ptParams);
+    err = mZed->enablePositionalTracking(ptParams);
 
     if (err != sl::ERROR_CODE::SUCCESS) {
       mPosTrackingStarted = false;

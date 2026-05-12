@@ -577,13 +577,13 @@ private:
   double mSensPubRate = 200.;
 
   std::vector<std::vector<float>> mRoyPolyParam;  // Manual ROI polygon
-  std::atomic<bool> mAutoRoiEnabled{false};
-  std::atomic<bool> mManualRoiEnabled{false};
+  bool mAutoRoiEnabled = false;
+  bool mManualRoiEnabled = false;
   float mRoiDepthFarThresh = 2.5f;
   float mRoiImgHeightRationCutOff = 0.5f;
   std::unordered_set<sl::MODULE> mRoiModules;
 
-  std::atomic<bool> mPosTrackingEnabled{false};
+  bool mPosTrackingEnabled = false;
   bool mPublishTF = false;
   bool mPublishMapTF = false;
   bool mPublishImuTF = false;
@@ -610,7 +610,7 @@ private:
   bool mSetGravityAsOrigin = false;
   int mPathMaxCount = -1;
 
-  std::atomic<bool> mGnssFusionEnabled{false};
+  bool mGnssFusionEnabled = false;
   std::string mGnssTopic = "/gps/fix";
   bool mGnssEnableReinitialization = true;
   bool mGnssEnableRollingCalibration = true;
@@ -624,11 +624,11 @@ private:
   bool mPublishUtmTf = true;
   bool mUtmAsParent = true;
 
-  std::atomic<bool> mMappingEnabled{false};
+  bool mMappingEnabled = false;
   float mMappingRes = 0.05f;
   float mMappingRangeMax = 10.0f;
 
-  std::atomic<bool> mObjDetRunning{false};
+  bool mObjDetEnabled = false;
   bool mObjDetTracking = true;
   double mObjDetPredTimeout = 0.5;
   bool mObjDetReducedPrecision = false;
@@ -660,7 +660,7 @@ private:
   std::unordered_map<int, std::string> mCustomLabels;
   std::unordered_map<std::string, int> mCustomClassIdMap;
 
-  std::atomic<bool> mBodyTrkEnabled{false};
+  bool mBodyTrkEnabled = false;
   sl::BODY_TRACKING_MODEL mBodyTrkModel =
     sl::BODY_TRACKING_MODEL::HUMAN_BODY_FAST;
   sl::BODY_FORMAT mBodyTrkFmt = sl::BODY_FORMAT::BODY_38;
@@ -1075,9 +1075,9 @@ private:
 
   bool mAreaFileExists = false;
   bool mResetOdomFromSrv = false;
-  bool mSpatialMappingRunning = false;
+  std::atomic<bool> mSpatialMappingRunning{false};
   std::atomic<bool> mObjDetRunning{false};
-  bool mBodyTrkRunning = false;
+  std::atomic<bool> mBodyTrkRunning{false};
   bool mRgbSubscribed = false;
   bool mGnssMsgReceived = false;  // Indicates if a NavSatFix topic has been
                                   // received, also with invalid position fix
