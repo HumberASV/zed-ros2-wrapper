@@ -976,14 +976,19 @@ bool ZedCamera::startObjDetect()
     od_p.custom_onnx_file = mYoloOnnxPath;
   }
 
-  sl::ERROR_CODE objDetError = mZed->enableObjectDetection(od_p);
-  if (objDetError != sl::ERROR_CODE::SUCCESS) {
-    RCLCPP_ERROR_STREAM(
-      get_logger(), "Object detection error: " << sl::toString(objDetError));
+  // ----> Safe enableObjectDetection
+  {
+    std::lock_guard<std::mutex> grab_lock(mGrabMutex);    
+    sl::ERROR_CODE objDetError = mZed->enableObjectDetection(od_p);
+    if (objDetError != sl::ERROR_CODE::SUCCESS) {
+      RCLCPP_ERROR_STREAM(
+        get_logger(), "Object detection error: " << sl::toString(objDetError));
 
-    mObjDetRunning = false;
-    return false;
+      mObjDetRunning = false;
+      return false;
+    }
   }
+  // <---- Safe enableObjectDetection
 
   if (!mPubObjDet) {
     mPubObjDet = create_publisher<zed_msgs::msg::ObjectsStamped>(
@@ -1003,7 +1008,13 @@ void ZedCamera::stopObjDetect()
     RCLCPP_INFO(get_logger(), "=== Stopping Object Detection ===");
     mObjDetRunning = false;
     mObjDetEnabled = false;
-    mZed->disableObjectDetection();
+
+    // ----> Safe disableObjectDetection
+    {
+      std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+      mZed->disableObjectDetection();
+    }
+    // <---- Safe disableObjectDetection
 
     // ----> Send an empty message to indicate that no more objects are tracked
     // (e.g clean RVIZ2)

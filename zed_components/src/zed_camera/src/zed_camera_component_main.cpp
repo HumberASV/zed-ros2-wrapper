@@ -5007,14 +5007,19 @@ void ZedCamera::threadFunc_zedGrab()
       }
       // <---- Params Debug info
 
-      if (isDepthRequired() || isPosTrackingRequired()) {
-        DEBUG_STREAM_GRAB("Grab thread: grabbing...");
-        mGrabStatus = mZed->grab(mRunParams);  // Process the full pipeline with depth
+      // ----> Safe grab
+      {
+        std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+        if (isDepthRequired() || isPosTrackingRequired()) {
+          DEBUG_STREAM_GRAB("Grab thread: grabbing...");
+          mGrabStatus = mZed->grab(mRunParams);  // Process the full pipeline with depth
 
-      } else {
-        DEBUG_GRAB("Grab thread: reading...");
-        mGrabStatus = mZed->read();  // Image and sensor data reading with no depth processing
+        } else {
+          DEBUG_GRAB("Grab thread: reading...");
+          mGrabStatus = mZed->read();  // Image and sensor data reading with no depth processing
+        }
       }
+      // <---- Safe grab
 
       DEBUG_GRAB("Grab thread: frame grabbed");
 

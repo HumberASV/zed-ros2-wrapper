@@ -576,13 +576,13 @@ private:
   double mSensPubRate = 200.;
 
   std::vector<std::vector<float>> mRoyPolyParam;  // Manual ROI polygon
-  bool mAutoRoiEnabled = false;
-  bool mManualRoiEnabled = false;
+  std::atomic<bool> mAutoRoiEnabled{false};
+  std::atomic<bool> mManualRoiEnabled{false};
   float mRoiDepthFarThresh = 2.5f;
   float mRoiImgHeightRationCutOff = 0.5f;
   std::unordered_set<sl::MODULE> mRoiModules;
 
-  bool mPosTrackingEnabled = false;
+  std::atomic<bool> mPosTrackingEnabled{false};
   bool mPublishTF = false;
   bool mPublishMapTF = false;
   bool mPublishImuTF = false;
@@ -609,7 +609,7 @@ private:
   bool mSetGravityAsOrigin = false;
   int mPathMaxCount = -1;
 
-  bool mGnssFusionEnabled = false;
+  std::atomic<bool> mGnssFusionEnabled{false};
   std::string mGnssTopic = "/gps/fix";
   bool mGnssEnableReinitialization = true;
   bool mGnssEnableRollingCalibration = true;
@@ -623,11 +623,11 @@ private:
   bool mPublishUtmTf = true;
   bool mUtmAsParent = true;
 
-  bool mMappingEnabled = false;
+  std::atomic<bool> mMappingEnabled{false};
   float mMappingRes = 0.05f;
   float mMappingRangeMax = 10.0f;
 
-  bool mObjDetEnabled = false;
+  std::atomic<bool> mObjDetRunning{false};
   bool mObjDetTracking = true;
   double mObjDetPredTimeout = 0.5;
   bool mObjDetReducedPrecision = false;
@@ -659,7 +659,7 @@ private:
   std::unordered_map<int, std::string> mCustomLabels;
   std::unordered_map<std::string, int> mCustomClassIdMap;
 
-  bool mBodyTrkEnabled = false;
+  std::atomic<bool> mBodyTrkEnabled{false};
   sl::BODY_TRACKING_MODEL mBodyTrkModel =
     sl::BODY_TRACKING_MODEL::HUMAN_BODY_FAST;
   sl::BODY_FORMAT mBodyTrkFmt = sl::BODY_FORMAT::BODY_38;
@@ -1030,6 +1030,7 @@ private:
   // <---- Threads and Timers
 
   // ----> Thread Sync
+  std::mutex mGrabMutex;
   std::mutex mRecMutex;
   std::mutex mDynParMutex;
   std::mutex mMappingMutex;
