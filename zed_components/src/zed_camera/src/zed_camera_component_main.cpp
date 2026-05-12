@@ -3843,8 +3843,12 @@ void ZedCamera::startFusedPcTimer(double fusedPcRate)
     mFusedPcTimer->cancel();
   }
 
+  if (fusedPcRate <= 0.0) {
+    return;
+  }
+
   std::chrono::milliseconds pubPeriod_msec(
-    static_cast<int>(1000.0 / (fusedPcRate)));
+    static_cast<int>(1000.0 / fusedPcRate));
   mFusedPcTimer = create_wall_timer(
     std::chrono::duration_cast<std::chrono::milliseconds>(pubPeriod_msec),
     std::bind(&ZedCamera::callback_pubFusedPc, this));
