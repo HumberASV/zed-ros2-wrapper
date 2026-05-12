@@ -412,7 +412,7 @@ void ZedCameraOne::getCameraInfoParams()
     sl_tools::getParam(shared_from_this(), "general.camera_id", _camId, _camId, " * Camera ID: ");
     sl_tools::getParam(
       shared_from_this(), "general.grab_frame_rate", _camGrabFrameRate, _camGrabFrameRate,
-        " * Camera framerate: ", false, 15,
+      " * Camera framerate: ", false, 15,
       120);
   }
   sl_tools::getParam(
@@ -462,7 +462,7 @@ void ZedCameraOne::getResolutionParams()
   } else {
     RCLCPP_WARN(
       get_logger(),
-        "Not valid 'general.pub_resolution' value: '%s'. Using default setting instead.",
+      "Not valid 'general.pub_resolution' value: '%s'. Using default setting instead.",
       out_resol.c_str());
     out_resol = "NATIVE";
     _pubResolution = PubRes::NATIVE;
@@ -472,7 +472,7 @@ void ZedCameraOne::getResolutionParams()
   if (_pubResolution == PubRes::CUSTOM) {
     sl_tools::getParam(
       shared_from_this(), "general.pub_downscale_factor", _customDownscaleFactor,
-        _customDownscaleFactor, " * Publishing downscale factor: ", false, 1.0,
+      _customDownscaleFactor, " * Publishing downscale factor: ", false, 1.0,
       5.0);
   } else {
     _customDownscaleFactor = 1.0;
@@ -483,7 +483,7 @@ void ZedCameraOne::getOpencvCalibrationParam()
 {
   sl_tools::getParam(
     shared_from_this(), "general.optional_opencv_calibration_file", _opencvCalibFile,
-      _opencvCalibFile,
+    _opencvCalibFile,
     " * OpenCV custom calibration: ");
 }
 

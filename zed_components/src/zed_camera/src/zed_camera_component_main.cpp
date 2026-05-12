@@ -6508,22 +6508,22 @@ void ZedCamera::processPose()
     std::pow(pose.getTranslation()(1) - mLastZedPose.getTranslation()(1), 2) +
     std::pow(pose.getTranslation()(2) - mLastZedPose.getTranslation()(2), 2));
   if (dist < 1e-9 && pt_state == sl::POSITIONAL_TRACKING_STATE::OK &&
-      mPosTrackingStatus.spatial_memory_status != sl::SPATIAL_MEMORY_STATUS::LOST)
-    {
-      mPoseLocked = true;
-      mPoseLockCount++;
+    mPosTrackingStatus.spatial_memory_status != sl::SPATIAL_MEMORY_STATUS::LOST)
+  {
+    mPoseLocked = true;
+    mPoseLockCount++;
 
-      if (mPoseLockCount > mCamGrabFrameRate) { // > 1 second
-        RCLCPP_WARN_STREAM(
+    if (mPoseLockCount > mCamGrabFrameRate) {   // > 1 second
+      RCLCPP_WARN_STREAM(
         get_logger(),
         "Pos. Track. seems to be locked (pose diff.: "
-            << dist << " m) since " << mPoseLockCount << " frames - Status: "
-            << sl::toString(mPosTrackingStatus.spatial_memory_status)
-            .c_str());
-      }
+          << dist << " m) since " << mPoseLockCount << " frames - Status: "
+          << sl::toString(mPosTrackingStatus.spatial_memory_status)
+          .c_str());
+    }
   } else {
-      mPoseLocked = false;
-      mPoseLockCount = 0;
+    mPoseLocked = false;
+    mPoseLockCount = 0;
   }
   // <---- Check for locked Positional Tracking
 #endif

@@ -42,7 +42,7 @@ void ZedCamera::initVideoDepthPublishers()
   // Helper to build topic names
   auto make_topic =
     [&](const std::string & sensor, const std::string & color_mode, const std::string & rect_raw,
-    const std::string & type) {
+      const std::string & type) {
       std::string topic = mTopicRoot + sensor + color_mode + rect_raw + type;
       return get_node_topics_interface()->resolve_topic_name(topic);
     };
