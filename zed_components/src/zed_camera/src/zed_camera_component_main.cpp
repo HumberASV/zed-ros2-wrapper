@@ -3888,8 +3888,13 @@ void ZedCamera::startPathPubTimer(double pathTimerRate)
 
 bool ZedCamera::startPosTracking()
 {
-  // Lock on Positional Tracking mutex to avoid race conditions
   std::lock_guard<std::mutex> lock(mPtMutex);
+  return startPosTrackingLocked();
+}
+
+bool ZedCamera::startPosTrackingLocked()
+{
+  // Caller must hold mPtMutex.
 
 #if (ZED_SDK_MAJOR_VERSION * 10 + ZED_SDK_MINOR_VERSION) >= 52
   // With ZED SDK v5.2 we can use Positional Tracking `GEN_3` even if depth is
@@ -4892,7 +4897,7 @@ void ZedCamera::threadFunc_zedGrab()
 
           // Dummy grab
           mZed->grab();
-  #endif
+#endif
           continue;
         } else {
           mGrabOnce = false; // Reset the flag and grab once
@@ -5069,8 +5074,8 @@ void ZedCamera::threadFunc_zedGrab()
               mOdomPath.clear();
               mPosePath.clear();
 
-              // Restart tracking
-              startPosTracking();
+              // Restart tracking — mPtMutex is already held by the grab loop
+              startPosTrackingLocked();
             }
             continue;
           } else {
@@ -5220,22 +5225,23 @@ void ZedCamera::threadFunc_zedGrab()
 
       // ----> Check recording status
       DEBUG_STREAM_GRAB("Grab thread: checking recording status");
-      mRecMutex.lock();
-      if (mRecording) {
-        mRecStatus = mZed->getRecordingStatus();
-        static int svo_rec_err_count = 0;
-        if (mRecStatus.is_recording && !mRecStatus.status) {
-          if (++svo_rec_err_count > 3) {
-            rclcpp::Clock steady_clock(RCL_STEADY_TIME);
-            RCLCPP_WARN_THROTTLE(
-              get_logger(), steady_clock, 1000.0,
-              "Error saving frame to SVO");
+      {
+        std::lock_guard<std::mutex> rec_lock(mRecMutex);
+        if (mRecording) {
+          mRecStatus = mZed->getRecordingStatus();
+          static int svo_rec_err_count = 0;
+          if (mRecStatus.is_recording && !mRecStatus.status) {
+            if (++svo_rec_err_count > 3) {
+              rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+              RCLCPP_WARN_THROTTLE(
+                get_logger(), steady_clock, 1000.0,
+                "Error saving frame to SVO");
+            }
+          } else {
+            svo_rec_err_count = 0;
           }
-        } else {
-          svo_rec_err_count = 0;
         }
       }
-      mRecMutex.unlock();
       // <---- Check recording status
 
       // ----> Retrieve Image/Depth data if someone has subscribed to
