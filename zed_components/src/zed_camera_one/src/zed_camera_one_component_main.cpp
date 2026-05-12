@@ -614,10 +614,6 @@ void ZedCameraOne::getDebugParams()
     _debugDynParams, _debugDynParams,
     " * Debug Dynamic Parameters: ");
   sl_tools::getParam(
-    shared_from_this(), "debug.debug_dyn_params",
-    _debugDynParams, _debugDynParams,
-    " * Debug Dynamic Parameters: ");
-  sl_tools::getParam(
     shared_from_this(), "debug.debug_video_depth",
     _debugVideoDepth, _debugVideoDepth,
     " * Debug Image/Depth: ");
