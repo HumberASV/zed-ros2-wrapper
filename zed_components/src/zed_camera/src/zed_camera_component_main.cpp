@@ -2915,7 +2915,8 @@ bool ZedCamera::startCamera()
         "GMSL PHY CSI bandwidth overflow detected: "
           << sl::toVerbose(
           mConnStatus)
-          << ". Please reduce the camera resolution or FPS, adjust GMSL branching/hardware, or consult the GMSL documentation for platform limits.");
+          <<
+          ". Please reduce the camera resolution or FPS, adjust GMSL branching/hardware, or consult the GMSL documentation for platform limits.");
       return false;
     }
 #endif
@@ -3024,7 +3025,8 @@ bool ZedCamera::startCamera()
       mVdPubRate = mCamGrabFrameRate;
       RCLCPP_WARN_STREAM(
         get_logger(),
-        "Video/Depth publishing rate was too high [" << mVdPubRate << "], capped to real grab rate: " <<
+        "Video/Depth publishing rate was too high [" << mVdPubRate <<
+          "], capped to real grab rate: " <<
           mCamGrabFrameRate);
     }
     if (mPcPubRate > mCamGrabFrameRate) {
@@ -5782,7 +5784,8 @@ void ZedCamera::publishCameraTFs(rclcpp::Time t)
   if (std::abs(baseline + stereo_transform.getTranslation().y) > EPSILON) {
     RCLCPP_WARN_STREAM(
       get_logger(),
-      "Baseline mismatch: Camera baseline is " << baseline << " m but calibrated stereo transform y-translation is " <<
+      "Baseline mismatch: Camera baseline is " << baseline <<
+        " m but calibrated stereo transform y-translation is " <<
         stereo_transform.getTranslation().y << " m.");
     not_valid = true;
   }
@@ -6510,7 +6513,7 @@ void ZedCamera::processPose()
     mPoseLocked = true;
     mPoseLockCount++;
 
-    if (mPoseLockCount > mCamGrabFrameRate) {  // > 1 second
+    if (mPoseLockCount > mCamGrabFrameRate) {   // > 1 second
       RCLCPP_WARN_STREAM(
         get_logger(),
         "Pos. Track. seems to be locked (pose diff.: "

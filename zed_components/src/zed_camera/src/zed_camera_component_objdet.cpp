@@ -231,7 +231,8 @@ void ZedCamera::getCustomOdParams()
     param_name = param_prefix + "confidence_threshold";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.detection_confidence_threshold, customOdProperties.detection_confidence_threshold, std::string(
+      customOdProperties.detection_confidence_threshold,
+      customOdProperties.detection_confidence_threshold, std::string(
         "  * ") + param_name + ": ", true, 0.0f, 100.0f);
     param_name = param_prefix + "is_grounded";
     sl_tools::getParam(
@@ -258,25 +259,29 @@ void ZedCamera::getCustomOdParams()
     param_name = param_prefix + "max_box_width_normalized";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.max_box_width_normalized, customOdProperties.max_box_width_normalized, std::string(
+      customOdProperties.max_box_width_normalized, customOdProperties.max_box_width_normalized,
+      std::string(
         "  * ") + param_name + ": ", true, -1.0f,
       1.0f);
     param_name = param_prefix + "min_box_width_normalized";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.min_box_width_normalized, customOdProperties.min_box_width_normalized, std::string(
+      customOdProperties.min_box_width_normalized, customOdProperties.min_box_width_normalized,
+      std::string(
         "  * ") + param_name + ": ", true, -1.0f,
       1.0f);
     param_name = param_prefix + "max_box_height_normalized";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.max_box_height_normalized, customOdProperties.max_box_height_normalized, std::string(
+      customOdProperties.max_box_height_normalized, customOdProperties.max_box_height_normalized,
+      std::string(
         "  * ") + param_name + ": ", true, -1.0f,
       1.0f);
     param_name = param_prefix + "min_box_height_normalized";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.min_box_height_normalized, customOdProperties.min_box_height_normalized, std::string(
+      customOdProperties.min_box_height_normalized, customOdProperties.min_box_height_normalized,
+      std::string(
         "  * ") + param_name + ": ", true, -1.0f,
       1.0f);
     param_name = param_prefix + "max_box_width_meters";
@@ -294,37 +299,43 @@ void ZedCamera::getCustomOdParams()
     param_name = param_prefix + "max_box_height_meters";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.max_box_height_meters, customOdProperties.max_box_height_meters, std::string(
+      customOdProperties.max_box_height_meters, customOdProperties.max_box_height_meters,
+      std::string(
         "  * ") + param_name + ": ", true, -1.0f,
       10000.0f);
     param_name = param_prefix + "max_allowed_acceleration";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.max_allowed_acceleration, customOdProperties.max_allowed_acceleration, std::string(
+      customOdProperties.max_allowed_acceleration, customOdProperties.max_allowed_acceleration,
+      std::string(
         "  * ") + param_name + ": ", true, 0.0f,
       100000.0f);
     param_name = param_prefix + "velocity_smoothing_factor";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.object_tracking_parameters.velocity_smoothing_factor, customOdProperties.object_tracking_parameters.velocity_smoothing_factor, std::string(
+      customOdProperties.object_tracking_parameters.velocity_smoothing_factor,
+      customOdProperties.object_tracking_parameters.velocity_smoothing_factor, std::string(
         "  * ") + param_name + ": ", true, 0.0f,
       1.0f);
     param_name = param_prefix + "min_velocity_threshold";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.object_tracking_parameters.min_velocity_threshold, customOdProperties.object_tracking_parameters.min_velocity_threshold, std::string(
+      customOdProperties.object_tracking_parameters.min_velocity_threshold,
+      customOdProperties.object_tracking_parameters.min_velocity_threshold, std::string(
         "  * ") + param_name + ": ", true, 0.0f,
       100.0f);
     param_name = param_prefix + "prediction_timeout_s";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.object_tracking_parameters.prediction_timeout_s, customOdProperties.object_tracking_parameters.prediction_timeout_s, std::string(
+      customOdProperties.object_tracking_parameters.prediction_timeout_s,
+      customOdProperties.object_tracking_parameters.prediction_timeout_s, std::string(
         "  * ") + param_name + ": ", true, 0.0f,
       100.0f);
     param_name = param_prefix + "min_confirmation_time_s";
     sl_tools::getParam(
       shared_from_this(), param_name,
-      customOdProperties.object_tracking_parameters.min_confirmation_time_s, customOdProperties.object_tracking_parameters.min_confirmation_time_s, std::string(
+      customOdProperties.object_tracking_parameters.min_confirmation_time_s,
+      customOdProperties.object_tracking_parameters.min_confirmation_time_s, std::string(
         "  * ") + param_name + ": ", true, 0.0f,
       100.0f);
 

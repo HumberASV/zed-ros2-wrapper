@@ -1945,14 +1945,16 @@ bool ZedCamera::checkGrabAndUpdateTimestamp(rclcpp::Time & out_pub_ts)
         static_cast<double>(mSdkGrabTS.data_ns - mLastTs_grab.data_ns) / 1e9;
       DEBUG_STREAM_VD(
         " * VIDEO/DEPTH PUB LAST PERIOD: "
-          << period_sec << " sec @" << 1. / period_sec << " Hz / Expected: " << 1. / mVdPubRate << " sec @" << mVdPubRate <<
+          << period_sec << " sec @" << 1. / period_sec << " Hz / Expected: " << 1. / mVdPubRate <<
+          " sec @" << mVdPubRate <<
           " Hz");
 
       mVideoDepthPeriodMean_sec->addValue(period_sec);
       DEBUG_STREAM_VD(
         " * VIDEO/DEPTH PUB MEAN PERIOD: "
           << mVideoDepthPeriodMean_sec->getAvg() << " sec @"
-          << 1. / mVideoDepthPeriodMean_sec->getAvg() << " Hz / Expected: " << 1. / mVdPubRate << " sec @" << mVdPubRate <<
+          << 1. / mVideoDepthPeriodMean_sec->getAvg() << " Hz / Expected: " << 1. / mVdPubRate <<
+          " sec @" << mVdPubRate <<
           " Hz");
       mLastTs_grab = mSdkGrabTS;
     }
@@ -3484,7 +3486,8 @@ bool ZedCamera::handleDepthParams(
     mVoxelParams.voxel_size = voxel_size_mm <= 0 ?
       static_cast<float>(voxel_size_mm) : static_cast<float>(voxel_size_mm / 1000.0);
     DEBUG_STREAM_DYN_PARAMS(
-      "Parameter '" << name << "' correctly set to " << voxel_size_mm << " mm (" << mVoxelParams.voxel_size <<
+      "Parameter '" << name << "' correctly set to " << voxel_size_mm << " mm (" <<
+        mVoxelParams.voxel_size <<
         " m)");
     return true;
   } else if (name == "depth.voxel_resolution_scale") {
