@@ -1591,10 +1591,10 @@ void ZedCamera::processVideoDepth()
 #endif
       retrieveVideoDepth(gpu);
 
-      // Signal Video/Depth thread that a new pointcloud is ready
-      mVdDataReadyCondVar.notify_one();
+      // Signal Video/Depth thread that new data is ready
       mVdDataReady = true;
       mVdPublishing = true;
+      mVdDataReadyCondVar.notify_one();
     } else {
       DEBUG_VD(" * [processVideoDepth] vd_lock not locked");
     }
@@ -2706,10 +2706,10 @@ void ZedCamera::processPointCloud()
         " * [processPointCloud] Retrieved point cloud size: " << mMatCloud.getWidth() << "x" <<
           mMatCloud.getHeight());
 
-      // Signal Pointcloud thread that a new pointcloud is ready
-      mPcDataReadyCondVar.notify_one();
+      // Signal Pointcloud thread that new data is ready
       mPcDataReady = true;
       mPcPublishing = true;
+      mPcDataReadyCondVar.notify_one();
 
       DEBUG_STREAM_PC(
         " * [processPointCloud] Extracted point cloud: " << mMatCloud.getInfos().c_str() );
