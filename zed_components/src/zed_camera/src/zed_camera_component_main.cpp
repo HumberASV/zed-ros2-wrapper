@@ -2915,7 +2915,8 @@ bool ZedCamera::startCamera()
         "GMSL PHY CSI bandwidth overflow detected: "
           << sl::toVerbose(
           mConnStatus)
-          << ". Please reduce the camera resolution or FPS, adjust GMSL branching/hardware, or consult the GMSL documentation for platform limits.");
+          <<
+          ". Please reduce the camera resolution or FPS, adjust GMSL branching/hardware, or consult the GMSL documentation for platform limits.");
       return false;
     }
 #endif
@@ -3024,7 +3025,8 @@ bool ZedCamera::startCamera()
       mVdPubRate = mCamGrabFrameRate;
       RCLCPP_WARN_STREAM(
         get_logger(),
-        "Video/Depth publishing rate was too high [" << mVdPubRate << "], capped to real grab rate: " <<
+        "Video/Depth publishing rate was too high [" << mVdPubRate <<
+          "], capped to real grab rate: " <<
           mCamGrabFrameRate);
     }
     if (mPcPubRate > mCamGrabFrameRate) {
@@ -3841,8 +3843,12 @@ void ZedCamera::startFusedPcTimer(double fusedPcRate)
     mFusedPcTimer->cancel();
   }
 
+  if (fusedPcRate <= 0.0) {
+    return;
+  }
+
   std::chrono::milliseconds pubPeriod_msec(
-    static_cast<int>(1000.0 / (fusedPcRate)));
+    static_cast<int>(1000.0 / fusedPcRate));
   mFusedPcTimer = create_wall_timer(
     std::chrono::duration_cast<std::chrono::milliseconds>(pubPeriod_msec),
     std::bind(&ZedCamera::callback_pubFusedPc, this));
@@ -3886,8 +3892,13 @@ void ZedCamera::startPathPubTimer(double pathTimerRate)
 
 bool ZedCamera::startPosTracking()
 {
-  // Lock on Positional Tracking mutex to avoid race conditions
   std::lock_guard<std::mutex> lock(mPtMutex);
+  return startPosTrackingLocked();
+}
+
+bool ZedCamera::startPosTrackingLocked()
+{
+  // Caller must hold mPtMutex.
 
 #if (ZED_SDK_MAJOR_VERSION * 10 + ZED_SDK_MINOR_VERSION) >= 52
   // With ZED SDK v5.2 we can use Positional Tracking `GEN_3` even if depth is
@@ -3903,17 +3914,29 @@ bool ZedCamera::startPosTracking()
     return false;
   }
 
+
   if (mZed && mZed->isPositionalTrackingEnabled()) {
     if (!mAreaMemoryFilePath.empty() && mSaveAreaMemoryOnClosing) {
-      mZed->disablePositionalTracking(mAreaMemoryFilePath.c_str());
+      // ----> Safe disablePositionalTracking
+      {
+        std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+        mZed->disablePositionalTracking(mAreaMemoryFilePath.c_str());
+      }
+      // <---- Safe disablePositionalTracking
       RCLCPP_INFO(
         get_logger(),
         "Area memory updated before restarting the Positional "
         "Tracking module.");
     } else {
-      mZed->disablePositionalTracking();
+      // ----> Safe disablePositionalTracking
+      {
+        std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+        mZed->disablePositionalTracking();
+      }
+      // <---- Safe disablePositionalTracking
     }
   }
+
 
   RCLCPP_INFO(get_logger(), "=== Starting Positional Tracking ===");
 
@@ -4000,15 +4023,21 @@ bool ZedCamera::startPosTracking()
     DEBUG_PT(json.c_str());
   }
 
-  sl::ERROR_CODE err = mZed->enablePositionalTracking(ptParams);
+  // ----> Safe enablePositionalTracking
+  sl::ERROR_CODE err;
+  {
+    std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+    err = mZed->enablePositionalTracking(ptParams);
 
-  if (err != sl::ERROR_CODE::SUCCESS) {
-    mPosTrackingStarted = false;
-    RCLCPP_WARN(
-      get_logger(), "Pos. Tracking not started: %s",
-      sl::toString(err).c_str());
-    return false;
+    if (err != sl::ERROR_CODE::SUCCESS) {
+      mPosTrackingStarted = false;
+      RCLCPP_WARN(
+        get_logger(), "Pos. Tracking not started: %s",
+        sl::toString(err).c_str());
+      return false;
+    }
   }
+  // <---- Safe enablePositionalTracking
 
   DEBUG_PT("Positional Tracking started");
 
@@ -4036,18 +4065,23 @@ bool ZedCamera::startPosTracking()
 
     fusion_params.gnss_calibration_parameters = gnss_par;
 
-    sl::FUSION_ERROR_CODE fus_err =
-      mFusion.enablePositionalTracking(fusion_params);
+    // ----> Safe enablePositionalTracking/disablePositionalTracking
+    {
+      std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+      sl::FUSION_ERROR_CODE fus_err =
+        mFusion.enablePositionalTracking(fusion_params);
 
-    if (fus_err != sl::FUSION_ERROR_CODE::SUCCESS) {
-      mPosTrackingStarted = false;
-      RCLCPP_WARN(
-        get_logger(), "Fusion Pos. Tracking not started: %s",
-        sl::toString(fus_err).c_str());
-      mZed->disablePositionalTracking();
-      return false;
+      if (fus_err != sl::FUSION_ERROR_CODE::SUCCESS) {
+        mPosTrackingStarted = false;
+        RCLCPP_WARN(
+          get_logger(), "Fusion Pos. Tracking not started: %s",
+          sl::toString(fus_err).c_str());
+        mZed->disablePositionalTracking();
+        return false;
+      }
+      DEBUG_GNSS("Fusion Positional Tracking started");
     }
-    DEBUG_GNSS("Fusion Positional Tracking started");
+    // <---- Safe enablePositionalTracking/disablePositionalTracking
   }
   // <---- Enable Fusion Positional Tracking if required
 
@@ -4867,7 +4901,7 @@ void ZedCamera::threadFunc_zedGrab()
 
           // Dummy grab
           mZed->grab();
-  #endif
+#endif
           continue;
         } else {
           mGrabOnce = false; // Reset the flag and grab once
@@ -5005,14 +5039,19 @@ void ZedCamera::threadFunc_zedGrab()
       }
       // <---- Params Debug info
 
-      if (isDepthRequired() || isPosTrackingRequired()) {
-        DEBUG_STREAM_GRAB("Grab thread: grabbing...");
-        mGrabStatus = mZed->grab(mRunParams);  // Process the full pipeline with depth
+      // ----> Safe grab
+      {
+        std::lock_guard<std::mutex> grab_lock(mGrabMutex);
+        if (isDepthRequired() || isPosTrackingRequired()) {
+          DEBUG_STREAM_GRAB("Grab thread: grabbing...");
+          mGrabStatus = mZed->grab(mRunParams);  // Process the full pipeline with depth
 
-      } else {
-        DEBUG_GRAB("Grab thread: reading...");
-        mGrabStatus = mZed->read();  // Image and sensor data reading with no depth processing
+        } else {
+          DEBUG_GRAB("Grab thread: reading...");
+          mGrabStatus = mZed->read();  // Image and sensor data reading with no depth processing
+        }
       }
+      // <---- Safe grab
 
       DEBUG_GRAB("Grab thread: frame grabbed");
 
@@ -5039,8 +5078,8 @@ void ZedCamera::threadFunc_zedGrab()
               mOdomPath.clear();
               mPosePath.clear();
 
-              // Restart tracking
-              startPosTracking();
+              // Restart tracking — mPtMutex is already held by the grab loop
+              startPosTrackingLocked();
             }
             continue;
           } else {
@@ -5190,22 +5229,23 @@ void ZedCamera::threadFunc_zedGrab()
 
       // ----> Check recording status
       DEBUG_STREAM_GRAB("Grab thread: checking recording status");
-      mRecMutex.lock();
-      if (mRecording) {
-        mRecStatus = mZed->getRecordingStatus();
-        static int svo_rec_err_count = 0;
-        if (mRecStatus.is_recording && !mRecStatus.status) {
-          if (++svo_rec_err_count > 3) {
-            rclcpp::Clock steady_clock(RCL_STEADY_TIME);
-            RCLCPP_WARN_THROTTLE(
-              get_logger(), steady_clock, 1000.0,
-              "Error saving frame to SVO");
+      {
+        std::lock_guard<std::mutex> rec_lock(mRecMutex);
+        if (mRecording) {
+          mRecStatus = mZed->getRecordingStatus();
+          static int svo_rec_err_count = 0;
+          if (mRecStatus.is_recording && !mRecStatus.status) {
+            if (++svo_rec_err_count > 3) {
+              rclcpp::Clock steady_clock(RCL_STEADY_TIME);
+              RCLCPP_WARN_THROTTLE(
+                get_logger(), steady_clock, 1000.0,
+                "Error saving frame to SVO");
+            }
+          } else {
+            svo_rec_err_count = 0;
           }
-        } else {
-          svo_rec_err_count = 0;
         }
       }
-      mRecMutex.unlock();
       // <---- Check recording status
 
       // ----> Retrieve Image/Depth data if someone has subscribed to
@@ -5782,7 +5822,8 @@ void ZedCamera::publishCameraTFs(rclcpp::Time t)
   if (std::abs(baseline + stereo_transform.getTranslation().y) > EPSILON) {
     RCLCPP_WARN_STREAM(
       get_logger(),
-      "Baseline mismatch: Camera baseline is " << baseline << " m but calibrated stereo transform y-translation is " <<
+      "Baseline mismatch: Camera baseline is " << baseline <<
+        " m but calibrated stereo transform y-translation is " <<
         stereo_transform.getTranslation().y << " m.");
     not_valid = true;
   }
@@ -6510,7 +6551,7 @@ void ZedCamera::processPose()
     mPoseLocked = true;
     mPoseLockCount++;
 
-    if (mPoseLockCount > mCamGrabFrameRate) {  // > 1 second
+    if (mPoseLockCount > mCamGrabFrameRate) {   // > 1 second
       RCLCPP_WARN_STREAM(
         get_logger(),
         "Pos. Track. seems to be locked (pose diff.: "

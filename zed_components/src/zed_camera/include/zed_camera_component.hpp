@@ -89,6 +89,7 @@ protected:
 
   bool startCamera();
   bool startPosTracking();
+  bool startPosTrackingLocked();  // caller must hold mPtMutex
   bool saveAreaMemoryFile(const std::string & filePath);
   bool start3dMapping();
   void stop3dMapping();
@@ -1030,6 +1031,7 @@ private:
   // <---- Threads and Timers
 
   // ----> Thread Sync
+  std::mutex mGrabMutex;
   std::mutex mRecMutex;
   std::mutex mDynParMutex;
   std::mutex mMappingMutex;
@@ -1073,9 +1075,9 @@ private:
 
   bool mAreaFileExists = false;
   bool mResetOdomFromSrv = false;
-  bool mSpatialMappingRunning = false;
+  std::atomic<bool> mSpatialMappingRunning{false};
   std::atomic<bool> mObjDetRunning{false};
-  bool mBodyTrkRunning = false;
+  std::atomic<bool> mBodyTrkRunning{false};
   bool mRgbSubscribed = false;
   bool mGnssMsgReceived = false;  // Indicates if a NavSatFix topic has been
                                   // received, also with invalid position fix
