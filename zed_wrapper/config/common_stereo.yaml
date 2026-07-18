@@ -7,7 +7,7 @@
         use_sim_time: false # Set to `true` only if there is a publisher for the simulated clock to the `/clock` topic. Normally used in simulation mode.
 
         simulation:
-            sim_enabled: false # HARDWARE: false = real ZED X. Set true only to connect to a simulation server (Isaac Sim). NOTE: zed_camera.launch.py's `sim_mode` arg overrides this at launch time.
+            sim_enabled: true # HARDWARE: false = real ZED X. Set true only to connect to a simulation server (Isaac Sim). NOTE: zed_camera.launch.py's `sim_mode` arg overrides this at launch time.
             sim_address: '100.115.12.26' # The connection address of the simulation server. See the documentation of the supported simulation plugins for more information.
             sim_port: 30000 # The connection port of the simulation server. See the documentation of the supported simulation plugins for more information.
 
